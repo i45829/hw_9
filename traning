@@ -9,51 +9,36 @@ from sklearn.metrics import mean_absolute_error, r2_score
 
 random_state = 64
 
-# Загрузка данных
 df = pd.read_csv('realty_data.csv')
 
-# Признаки и целевая переменная
-X = df[['postcode', 'lat', 'lon', 'total_square', 'rooms', 'floor']]
+X = df[['total_square', 'rooms', 'floor']]
 y = df['price']
 
-# Удаляем пропуски в целевой переменной
 valid = y.notna()
 X = X[valid]
 y = y[valid]
 
-# Заполнение пропусков
 imputer = SimpleImputer(strategy='median')
 X = imputer.fit_transform(X)
 
-# Разделение данных
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y,
-    test_size=0.25,
-    random_state=random_state
-)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=random_state)
 
-# Масштабирование
 scaler = StandardScaler()
 
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
-# Обучение модели
 model = LinearRegression()
 model.fit(X_train, y_train)
 
-# Предсказание
 y_pred = model.predict(X_test)
 
-# Метрики
-mae = mean_absolute_error(y_test, y_pred)
 r2 = r2_score(y_test, y_pred)
 
-print(f'MAE: {mae:.2f}')
-print(f'R2: {r2:.2f}')
+print('Rr2="{:.2f}"'.format(r2))
 
-# Сохранение модели и объектов обработки
 with open('model.pkl', 'wb') as file:
     pickle.dump(model, file)
 
-print('Модель сохранена')
+with open('scaler.pkl', 'wb') as file:
+    pickle.dump(scaler, file)
